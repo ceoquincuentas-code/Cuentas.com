@@ -249,6 +249,48 @@
             font-weight: bold;
             color: #667eea;
         }
+
+        .expense-item {
+    background: #fff3cd;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 4px solid #ffc107;
+}
+
+.expense-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.expense-description {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.expense-amount {
+    font-weight: bold;
+    color: #f5576c;
+    font-size: 1.2em;
+}
+
+.expense-meta {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: #667eea;
+    color: white;
+    font-size: 0.8em;
+    margin-left: 10px;
+}
     </style>
 </head>
 <body>
@@ -306,36 +348,6 @@
                 </div>
             </div>
 
-            <!-- Registrar Gastos -->
-            <div class="card">
-                <h2>📝 Registrar Gastos</h2>
-                <div class="form-group">
-                    <label>Concepto del Gasto:</label>
-                    <input type="text" id="expenseConcept" placeholder="Ej: Alquiler, servicios, transporte">
-                </div>
-                <div class="form-group">
-                    <label>Monto:</label>
-                    <input type="number" id="expenseAmount" placeholder="Monto del gasto" step="0.01" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Fecha:</label>
-                    <input type="date" id="expenseDate">
-                </div>
-                <div class="form-group">
-                    <label>Categoría:</label>
-                    <select id="expenseCategory">
-                        <option value="operacional">Operacional</option>
-                        <option value="servicios">Servicios (luz, agua, etc.)</option>
-                        <option value="transporte">Transporte</option>
-                        <option value="alquiler">Alquiler</option>
-                        <option value="marketing">Marketing</option>
-                        <option value="otros">Otros</option>
-                    </select>
-                </div>
-                <button onclick="addExpense()">Agregar Gasto</button>
-                <div id="expenseMessage"></div>
-            </div>
-
             <!-- Resumen Financiero -->
             <div class="card">
                 <h2>📈 Resumen Financiero</h2>
@@ -349,10 +361,6 @@
                         <div class="cash-value">$<span id="totalSold">0.00</span></div>
                     </div>
                     <div class="cash-item">
-                        <div class="cash-label">Total Gastos</div>
-                        <div class="cash-value" style="color: #f5576c;">$<span id="totalExpenses">0.00</span></div>
-                    </div>
-                    <div class="cash-item">
                         <div class="cash-label">Ganancia Neta</div>
                         <div class="cash-value" style="color: #28a745;">$<span id="netProfit">0.00</span></div>
                     </div>
@@ -360,13 +368,39 @@
                         <div class="cash-label">Valor Inventario</div>
                         <div class="cash-value" style="color: #764ba2;">$<span id="inventoryValue">0.00</span></div>
                     </div>
-                    <div class="cash-item">
-                        <div class="cash-label">Balance Final</div>
-                        <div class="cash-value" style="color: #667eea;">$<span id="finalBalance">0.00</span></div>
-                    </div>
                 </div>
             </div>
         </div>
+
+
+        !-- Registrar Gastos -->
+<div class="card">
+    <h2>💸 Registrar Gastos</h2>
+    <div class="form-group">
+        <label>Descripción del Gasto:</label>
+        <input type="text" id="expenseDescription" placeholder="Ej: Alquiler, servicios, transporte">
+    </div>
+    <div class="form-group">
+        <label>Monto:</label>
+        <input type="number" id="expenseAmount" placeholder="Monto del gasto" step="0.01" min="0">
+    </div>
+    <div class="form-group">
+        <label>Categoría:</label>
+        <select id="expenseCategory">
+            <option value="operativo">Operativo</option>
+            <option value="alquiler">Alquiler</option>
+            <option value="servicios">Servicios</option>
+            <option value="transporte">Transporte</option>
+            <option value="otros">Otros</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Fecha:</label>
+        <input type="date" id="expenseDate">
+    </div>
+    <button onclick="addExpense()">Registrar Gasto</button>
+    <div id="expenseMessage"></div>
+</div>
 
         <!-- Inventario Actual -->
         <div class="card">
@@ -376,13 +410,17 @@
             </div>
         </div>
 
-        <!-- Historial de Gastos -->
-        <div class="card">
-            <h2>💸 Historial de Gastos</h2>
-            <div class="products-list" id="expensesList">
-                <p style="text-align: center; color: #999;">No hay gastos registrados</p>
-            </div>
-        </div>
+        <!-- Lista de Gastos -->
+<div class="card">
+    <h2>📋 Historial de Gastos</h2>
+    <div class="products-list" id="expensesList">
+        <p style="text-align: center; color: #999;">No hay gastos registrados</p>
+    </div>
+    <div class="summary" style="margin-top: 20px;">
+        <h3>Total Gastos:</h3>
+        <div class="summary-value">$<span id="totalExpenses">0.00</span></div>
+    </div>
+</div>
 
         <!-- Botón de Exportación -->
         <button class="export-btn" onclick="exportReport()">📄 Generar Informe para Imprimir</button>
@@ -397,12 +435,12 @@
     </div>
 
     <script>
+        let expenses = [];
+let totalExpenses = 0;
         let products = {};
         let totalInvested = 0;
         let totalSold = 0;
         let sales = [];
-        let expenses = [];
-        let totalExpenses = 0;
 
         // Cargar datos guardados al iniciar
         function loadData() {
@@ -411,8 +449,6 @@
                 const savedSales = localStorage.getItem('inventorySales');
                 const savedInvested = localStorage.getItem('inventoryInvested');
                 const savedSold = localStorage.getItem('inventorySold');
-                const savedExpenses = localStorage.getItem('inventoryExpenses');
-                const savedTotalExpenses = localStorage.getItem('inventoryTotalExpenses');
 
                 if (savedProducts) {
                     products = JSON.parse(savedProducts);
@@ -426,12 +462,17 @@
                 if (savedSold) {
                     totalSold = parseFloat(savedSold);
                 }
-                if (savedExpenses) {
-                    expenses = JSON.parse(savedExpenses);
-                }
-                if (savedTotalExpenses) {
-                    totalExpenses = parseFloat(savedTotalExpenses);
-                }
+
+                // Agregar después de: if (savedSold) { ... }
+const savedExpenses = localStorage.getItem('inventoryExpenses');
+const savedTotalExpenses = localStorage.getItem('inventoryTotalExpenses');
+
+if (savedExpenses) {
+    expenses = JSON.parse(savedExpenses);
+}
+if (savedTotalExpenses) {
+    totalExpenses = parseFloat(savedTotalExpenses);
+}
 
                 showSaveMessage('Datos cargados correctamente ✓');
             } catch (error) {
@@ -446,8 +487,9 @@
                 localStorage.setItem('inventorySales', JSON.stringify(sales));
                 localStorage.setItem('inventoryInvested', totalInvested.toString());
                 localStorage.setItem('inventorySold', totalSold.toString());
-                localStorage.setItem('inventoryExpenses', JSON.stringify(expenses));
-                localStorage.setItem('inventoryTotalExpenses', totalExpenses.toString());
+                // Agregar después de: localStorage.setItem('inventorySold', totalSold.toString());
+localStorage.setItem('inventoryExpenses', JSON.stringify(expenses));
+localStorage.setItem('inventoryTotalExpenses', totalExpenses.toString());
                 showSaveMessage('Guardado ✓');
             } catch (error) {
                 console.error('Error al guardar datos:', error);
@@ -469,7 +511,8 @@
         window.addEventListener('DOMContentLoaded', function() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('productDate').value = today;
-            document.getElementById('expenseDate').value = today;
+            // Agregar después de: document.getElementById('productDate').value = today;
+document.getElementById('expenseDate').value = today;
             loadData();
             updateDisplay();
         });
@@ -550,54 +593,55 @@
             updateDisplay();
         }
 
-        function addExpense() {
-            const concept = document.getElementById('expenseConcept').value.trim();
-            const amount = parseFloat(document.getElementById('expenseAmount').value);
-            const date = document.getElementById('expenseDate').value;
-            const category = document.getElementById('expenseCategory').value;
-            
-            if (!concept || !amount || !date) {
-                showMessage('expenseMessage', 'Por favor completa todos los campos', 'error');
-                return;
-            }
-
-            expenses.push({
-                concept: concept,
-                amount: amount,
-                date: date,
-                category: category
-            });
-
-            totalExpenses += amount;
-            
-            document.getElementById('expenseConcept').value = '';
-            document.getElementById('expenseAmount').value = '';
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('expenseDate').value = today;
-            
-            saveData();
-            showMessage('expenseMessage', '✓ Gasto registrado exitosamente', 'success');
-            updateDisplay();
-        }
-
         function deleteProduct(name) {
             if (confirm(`¿Estás seguro de eliminar "${name}"?`)) {
                 totalInvested -= products[name].totalCost;
                 totalSold -= products[name].price * products[name].sold;
                 delete products[name];
-                saveData();
                 updateDisplay();
             }
         }
 
-        function deleteExpense(index) {
-            if (confirm('¿Estás seguro de eliminar este gasto?')) {
-                totalExpenses -= expenses[index].amount;
-                expenses.splice(index, 1);
-                saveData();
-                updateDisplay();
-            }
-        }
+        function addExpense() {
+    const description = document.getElementById('expenseDescription').value.trim();
+    const amount = parseFloat(document.getElementById('expenseAmount').value);
+    const category = document.getElementById('expenseCategory').value;
+    const date = document.getElementById('expenseDate').value;
+    
+    if (!description || !amount || !date) {
+        showMessage('expenseMessage', 'Por favor completa todos los campos', 'error');
+        return;
+    }
+
+    expenses.push({
+        description: description,
+        amount: amount,
+        category: category,
+        date: date,
+        id: Date.now()
+    });
+
+    totalExpenses += amount;
+    
+    document.getElementById('expenseDescription').value = '';
+    document.getElementById('expenseAmount').value = '';
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('expenseDate').value = today;
+    
+    saveData();
+    showMessage('expenseMessage', '✓ Gasto registrado exitosamente', 'success');
+    updateDisplay();
+}
+
+function deleteExpense(id) {
+    const expense = expenses.find(e => e.id === id);
+    if (expense && confirm(`¿Eliminar gasto: ${expense.description}?`)) {
+        totalExpenses -= expense.amount;
+        expenses = expenses.filter(e => e.id !== id);
+        saveData();
+        updateDisplay();
+    }
+}
 
         function updateDisplay() {
             // Actualizar lista de productos
@@ -625,6 +669,47 @@
                                 Precio: $${product.price.toFixed(2)} | 
                                 Valor en Stock: $${(product.quantity * product.cost).toFixed(2)} |
                                 Fecha Ingreso: ${formatDate(product.dateAdded)}
+
+                                function addExpense() {
+    const description = document.getElementById('expenseDescription').value.trim();
+    const amount = parseFloat(document.getElementById('expenseAmount').value);
+    const category = document.getElementById('expenseCategory').value;
+    const date = document.getElementById('expenseDate').value;
+    
+    if (!description || !amount || !date) {
+        showMessage('expenseMessage', 'Por favor completa todos los campos', 'error');
+        return;
+    }
+
+    expenses.push({
+        description: description,
+        amount: amount,
+        category: category,
+        date: date,
+        id: Date.now()
+    });
+
+    totalExpenses += amount;
+    
+    document.getElementById('expenseDescription').value = '';
+    document.getElementById('expenseAmount').value = '';
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('expenseDate').value = today;
+    
+    saveData();
+    showMessage('expenseMessage', '✓ Gasto registrado exitosamente', 'success');
+    updateDisplay();
+}
+
+function deleteExpense(id) {
+    const expense = expenses.find(e => e.id === id);
+    if (expense && confirm(`¿Eliminar gasto: ${expense.description}?`)) {
+        totalExpenses -= expense.amount;
+        expenses = expenses.filter(e => e.id !== id);
+        saveData();
+        updateDisplay();
+    }
+}
                             </div>
                         </div>
                         <button class="delete-btn" onclick="deleteProduct('${name}')">Eliminar</button>
@@ -639,35 +724,10 @@
                     }
                 }
             }
-
-            // Actualizar lista de gastos
-            const expensesList = document.getElementById('expensesList');
-            if (expenses.length === 0) {
-                expensesList.innerHTML = '<p style="text-align: center; color: #999;">No hay gastos registrados</p>';
-            } else {
-                expensesList.innerHTML = '';
-                for (let i = 0; i < expenses.length; i++) {
-                    const expense = expenses[i];
-                    const div = document.createElement('div');
-                    div.className = 'product-item';
-                    div.innerHTML = `
-                        <div class="product-info">
-                            <div class="product-name">${expense.concept}</div>
-                            <div class="product-details">
-                                Monto: $${expense.amount.toFixed(2)} | 
-                                Categoría: ${expense.category} | 
-                                Fecha: ${formatDate(expense.date)}
-                            </div>
-                        </div>
-                        <button class="delete-btn" onclick="deleteExpense(${i})">Eliminar</button>
-                    `;
-                    expensesList.appendChild(div);
-                }
-            }
             
             // Actualizar resumen financiero
-            const netProfit = totalSold - totalInvested;
-            const finalBalance = netProfit - totalExpenses;
+            const netProfitWithExpenses = totalSold - totalInvested - totalExpenses;
+    document.getElementById('netProfit').textContent = netProfitWithExpenses.toFixed(2);
             let inventoryValue = 0;
             
             for (let name in products) {
@@ -676,10 +736,8 @@
             
             document.getElementById('totalInvested').textContent = totalInvested.toFixed(2);
             document.getElementById('totalSold').textContent = totalSold.toFixed(2);
-            document.getElementById('totalExpenses').textContent = totalExpenses.toFixed(2);
             document.getElementById('netProfit').textContent = netProfit.toFixed(2);
             document.getElementById('inventoryValue').textContent = inventoryValue.toFixed(2);
-            document.getElementById('finalBalance').textContent = finalBalance.toFixed(2);
             document.getElementById('cashToDeliver').textContent = totalSold.toFixed(2);
         }
 
@@ -743,30 +801,13 @@
                 }
             }
 
-            let expensesHTML = '';
-            if (expenses.length === 0) {
-                expensesHTML = '<tr><td colspan="4" style="border: 1px solid #ddd; padding: 12px; text-align: center; color: #999;">No hay gastos registrados</td></tr>';
-            } else {
-                for (let i = 0; i < expenses.length; i++) {
-                    const expense = expenses[i];
-                    const dateFormatted = formatDate(expense.date);
-                    expensesHTML += '<tr>';
-                    expensesHTML += '<td style="border: 1px solid #ddd; padding: 12px;">' + expense.concept + '</td>';
-                    expensesHTML += '<td style="border: 1px solid #ddd; padding: 12px; text-align: center;">' + expense.category + '</td>';
-                    expensesHTML += '<td style="border: 1px solid #ddd; padding: 12px; text-align: right;">$' + expense.amount.toFixed(2) + '</td>';
-                    expensesHTML += '<td style="border: 1px solid #ddd; padding: 12px; text-align: center;">' + dateFormatted + '</td>';
-                    expensesHTML += '</tr>';
-                }
-            }
-
             const netProfit = totalSold - totalInvested;
-            const finalBalance = netProfit - totalExpenses;
             let inventoryValue = 0;
             for (let name in products) {
                 inventoryValue += products[name].quantity * products[name].cost;
             }
 
-            const reportHTML = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Informe de Inventario y Ventas</title><style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:40px;background:white}.header{text-align:center;border-bottom:3px solid #667eea;padding-bottom:20px;margin-bottom:30px}h1{color:#667eea;margin:0;font-size:28px}.date{color:#666;margin-top:10px}.section{margin-bottom:40px}h2{color:#764ba2;border-bottom:2px solid #764ba2;padding-bottom:10px;margin-bottom:20px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th{background:#667eea;color:white;padding:12px;text-align:left;border:1px solid #667eea}td{border:1px solid #ddd;padding:12px}tr:nth-child(even){background-color:#f9f9f9}.summary-box{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:30px}.summary-item{border:2px solid #667eea;border-radius:10px;padding:20px;text-align:center}.summary-label{color:#666;font-size:14px;margin-bottom:10px}.summary-value{font-size:32px;font-weight:bold;color:#667eea}.profit{color:#28a745!important}.expense{color:#f5576c!important}.signature-section{margin-top:60px;padding-top:30px;border-top:2px solid #ddd}.signature-box{display:grid;grid-template-columns:repeat(2,1fr);gap:40px;margin-top:40px}.signature-line{border-top:2px solid #333;padding-top:10px;text-align:center}@media print{body{padding:20px}}</style></head><body><div class="header"><h1>📊 INFORME DE INVENTARIO Y VENTAS</h1><div class="date">Generado el: ' + reportDate + '</div></div><div class="section"><h2>📦 Inventario Actual</h2><table><thead><tr><th>Producto</th><th style="text-align:center">Stock Disponible</th><th style="text-align:center">Unidades Vendidas</th><th style="text-align:right">Precio Venta</th><th style="text-align:right">Valor en Stock</th><th style="text-align:center">Fecha Ingreso</th></tr></thead><tbody>' + inventoryHTML + '</tbody></table></div><div class="section"><h2>💰 Historial de Ventas</h2><table><thead><tr><th>Producto</th><th style="text-align:center">Cantidad</th><th style="text-align:right">Precio Unitario</th><th style="text-align:right">Total</th><th style="text-align:center">Fecha de Venta</th></tr></thead><tbody>' + salesHTML + '</tbody></table></div><div class="section"><h2>💸 Historial de Gastos</h2><table><thead><tr><th>Concepto</th><th style="text-align:center">Categoría</th><th style="text-align:right">Monto</th><th style="text-align:center">Fecha</th></tr></thead><tbody>' + expensesHTML + '</tbody></table></div><div class="section"><h2>📈 Resumen Financiero</h2><div class="summary-box"><div class="summary-item"><div class="summary-label">Total Invertido</div><div class="summary-value"> + totalInvested.toFixed(2) + '</div></div><div class="summary-item"><div class="summary-label">Total Vendido</div><div class="summary-value"> + totalSold.toFixed(2) + '</div></div><div class="summary-item"><div class="summary-label">Total Gastos</div><div class="summary-value expense"> + totalExpenses.toFixed(2) + '</div></div><div class="summary-item"><div class="summary-label">Ganancia Bruta</div><div class="summary-value profit"> + netProfit.toFixed(2) + '</div></div><div class="summary-item"><div class="summary-label">Balance Final</div><div class="summary-value" style="color:#667eea"> + finalBalance.toFixed(2) + '</div></div><div class="summary-item"><div class="summary-label">Valor Inventario Actual</div><div class="summary-value"> + inventoryValue.toFixed(2) + '</div></div></div></div><div class="section"><h2>💵 Efectivo a Entregar</h2><div style="border:3px solid #28a745;border-radius:10px;padding:30px;text-align:center;background:#f0f9f4"><div style="font-size:18px;color:#666;margin-bottom:10px">Total en Efectivo</div><div style="font-size:48px;font-weight:bold;color:#28a745"> + totalSold.toFixed(2) + '</div></div></div><div class="signature-section"><h2>✍️ Firmas y Aprobación</h2><div class="signature-box"><div><div class="signature-line"><strong>Entregado por</strong><br>Nombre y Firma</div></div><div><div class="signature-line"><strong>Recibido por</strong><br>Nombre y Firma</div></div></div></div></body></html>';
+            const reportHTML = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Informe de Inventario y Ventas</title><style>body{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:40px;background:white}.header{text-align:center;border-bottom:3px solid #667eea;padding-bottom:20px;margin-bottom:30px}h1{color:#667eea;margin:0;font-size:28px}.date{color:#666;margin-top:10px}.section{margin-bottom:40px}h2{color:#764ba2;border-bottom:2px solid #764ba2;padding-bottom:10px;margin-bottom:20px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th{background:#667eea;color:white;padding:12px;text-align:left;border:1px solid #667eea}td{border:1px solid #ddd;padding:12px}tr:nth-child(even){background-color:#f9f9f9}.summary-box{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:30px}.summary-item{border:2px solid #667eea;border-radius:10px;padding:20px;text-align:center}.summary-label{color:#666;font-size:14px;margin-bottom:10px}.summary-value{font-size:32px;font-weight:bold;color:#667eea}.profit{color:#28a745!important}.signature-section{margin-top:60px;padding-top:30px;border-top:2px solid #ddd}.signature-box{display:grid;grid-template-columns:repeat(2,1fr);gap:40px;margin-top:40px}.signature-line{border-top:2px solid #333;padding-top:10px;text-align:center}@media print{body{padding:20px}}</style></head><body><div class="header"><h1>📊 INFORME DE INVENTARIO Y VENTAS</h1><div class="date">Generado el: ' + reportDate + '</div></div><div class="section"><h2>📦 Inventario Actual</h2><table><thead><tr><th>Producto</th><th style="text-align:center">Stock Disponible</th><th style="text-align:center">Unidades Vendidas</th><th style="text-align:right">Precio Venta</th><th style="text-align:right">Valor en Stock</th><th style="text-align:center">Fecha Ingreso</th></tr></thead><tbody>' + inventoryHTML + '</tbody></table></div><div class="section"><h2>💰 Historial de Ventas</h2><table><thead><tr><th>Producto</th><th style="text-align:center">Cantidad</th><th style="text-align:right">Precio Unitario</th><th style="text-align:right">Total</th><th style="text-align:center">Fecha de Venta</th></tr></thead><tbody>' + salesHTML + '</tbody></table></div><div class="section"><h2>📈 Resumen Financiero</h2><div class="summary-box"><div class="summary-item"><div class="summary-label">Total Invertido</div><div class="summary-value">$' + totalInvested.toFixed(2) + '</div></div><div class="summary-item"><div class="summary-label">Total Vendido</div><div class="summary-value">$' + totalSold.toFixed(2) + '</div></div><div class="summary-item"><div class="summary-label">Ganancia Neta</div><div class="summary-value profit">$' + netProfit.toFixed(2) + '</div></div><div class="summary-item"><div class="summary-label">Valor Inventario Actual</div><div class="summary-value">$' + inventoryValue.toFixed(2) + '</div></div></div></div><div class="section"><h2>💵 Efectivo a Entregar</h2><div style="border:3px solid #28a745;border-radius:10px;padding:30px;text-align:center;background:#f0f9f4"><div style="font-size:18px;color:#666;margin-bottom:10px">Total en Efectivo</div><div style="font-size:48px;font-weight:bold;color:#28a745">$' + totalSold.toFixed(2) + '</div></div></div><div class="signature-section"><h2>✍️ Firmas y Aprobación</h2><div class="signature-box"><div><div class="signature-line"><strong>Entregado por</strong><br>Nombre y Firma</div></div><div><div class="signature-line"><strong>Recibido por</strong><br>Nombre y Firma</div></div></div></div></body></html>';
 
             const newWindow = window.open('', '_blank');
             if (newWindow) {
@@ -784,10 +825,8 @@
             const backupData = {
                 products: products,
                 sales: sales,
-                expenses: expenses,
                 totalInvested: totalInvested,
                 totalSold: totalSold,
-                totalExpenses: totalExpenses,
                 backupDate: new Date().toISOString()
             };
 
@@ -818,10 +857,8 @@
                     if (confirm('¿Estás seguro de restaurar este respaldo? Se reemplazarán todos los datos actuales.')) {
                         products = backupData.products || {};
                         sales = backupData.sales || [];
-                        expenses = backupData.expenses || [];
                         totalInvested = backupData.totalInvested || 0;
                         totalSold = backupData.totalSold || 0;
-                        totalExpenses = backupData.totalExpenses || 0;
                         
                         saveData();
                         updateDisplay();
@@ -838,13 +875,11 @@
 
         function clearAllData() {
             if (confirm('⚠️ ¿Estás SEGURO de eliminar TODOS los datos?\n\nEsta acción NO se puede deshacer.\n\nTe recomendamos descargar un respaldo antes de continuar.')) {
-                if (confirm('ÚLTIMA CONFIRMACIÓN: ¿Eliminar todo el inventario, ventas, gastos e historial?')) {
+                if (confirm('ÚLTIMA CONFIRMACIÓN: ¿Eliminar todo el inventario, ventas e historial?')) {
                     products = {};
                     sales = [];
-                    expenses = [];
                     totalInvested = 0;
                     totalSold = 0;
-                    totalExpenses = 0;
                     
                     localStorage.clear();
                     updateDisplay();
